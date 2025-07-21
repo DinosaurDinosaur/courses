@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生選課系統</title>
+    <style>
+        /* 頁面基本樣式 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        /* 表單容器樣式 */
+        .container {
+            background-color: #ffffff;
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            box-sizing: border-box;
+        }
+        /* 標題樣式 */
+        h1 {
+            text-align: center;
+            color: #343a40;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 600;
+        }
+        /* 表單組 (標籤+輸入框) 樣式 */
+        .form-group {
+            margin-bottom: 22px;
+        }
+        /* 標籤樣式 */
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #495057;
+            font-size: 1.1em;
+        }
+        /* 輸入框和選擇框樣式 */
+        input[type="text"],
+        select {
+            width: calc(100% - 24px); /* 寬度減去內邊距和邊框 */
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1.05em;
+            box-sizing: border-box; /* 讓 padding 和 border 包含在寬度內 */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease; /* 平滑過渡效果 */
+        }
+        /* 輸入框和選擇框聚焦時的樣式 */
+        input[type="text"]:focus,
+        select:focus {
+            border-color: #80bdff;
+            outline: 0;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+        /* 按鈕樣式 */
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #28a745; /* 綠色背景 */
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            letter-spacing: 1px;
+        }
+        /* 按鈕滑鼠懸停時的樣式 */
+        button:hover {
+            background-color: #218838;
+            transform: translateY(-2px); /* 向上微移 */
+        }
+        /* 按鈕點擊時的樣式 */
+        button:active {
+            transform: translateY(0);
+        }
+        /* 訊息顯示區塊樣式 */
+        #message {
+            margin-top: 25px;
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1em;
+            display: none; /* 預設隱藏 */
+            box-sizing: border-box;
+        }
+        /* 成功訊息樣式 */
+        #message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        /* 錯誤訊息樣式 */
+        #message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 學生選課表單</h1>
+        <form id="courseEnrollmentForm">
+            <div class="form-group">
+                <label for="studentName">學生姓名:</label>
+                <input type="text" id="studentName" name="studentName" required placeholder="請輸入您的姓名">
+            </div>
+
+            <div class="form-group">
+                <label for="selectedCourse">選擇課程:</label>
+                <select id="selectedCourse" name="selectedCourse" required>
+                    <option value="">-- 請選擇課程 --</option>
+                    <option value="數學課">數學課</option>
+                    <option value="英文課">英文課</option>
+                    <option value="國文課">國文課</option>
+                </select>
+            </div>
+
+            <button type="submit">📝 提交選課</button>
+        </form>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // 監聽表單的提交事件
+        document.getElementById('courseEnrollmentForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // 阻止表單的預設提交行為 (防止頁面重新載入)
+
+            const form = event.target; // 獲取觸發表單提交的表單元素
+            const formData = new FormData(form); // 建立 FormData 物件來獲取表單數據
+            
+            // 從 FormData 中獲取 `studentName` 和 `selectedCourse` 的值
+            const studentName = formData.get('studentName');
+            const selectedCourse = formData.get('selectedCourse');
+
+            // 組織要發送給後端的資料物件 (JSON 格式)
+            const data = { studentName, selectedCourse };
+
+            const messageDiv = document.getElementById('message'); // 獲取顯示訊息的元素
+            messageDiv.style.display = 'none'; // 預設隱藏訊息，以便在每次提交時更新
+
+            try {
+                // 使用 fetch API 向後端發送 POST 請求
+                // **重要：這裡的路徑必須與 app.js 中的 app.post('/submit-enrollment', ...) 完全一致**
+                const response = await fetch('/submit-enrollment', { 
+                    method: 'POST', // 請求方法為 POST
+                    headers: {
+                        'Content-Type': 'application/json' // 告訴伺服器我們發送的是 JSON 格式數據
+                    },
+                    body: JSON.stringify(data) // 將 JavaScript 物件轉換為 JSON 字串作為請求體
+                });
+
+                const result = await response.text(); // 獲取伺服器返回的文字訊息 (後端 now sends .send() not .json())
+
+                if (response.ok) { // 檢查 HTTP 響應狀態碼是否表示成功 (2xx 範圍)
+                    messageDiv.classList.remove('error'); // 移除錯誤樣式
+                    messageDiv.classList.add('success'); // 添加成功樣式
+                    messageDiv.textContent = result; // 顯示成功訊息
+                    form.reset(); // 成功後重設表單，清空輸入內容
+                } else { // 如果響應狀態碼表示錯誤
+                    messageDiv.classList.remove('success'); // 移除成功樣式
+                    messageDiv.classList.add('error'); // 添加錯誤樣式
+                    messageDiv.textContent = result || '提交失敗，請重試。'; // 顯示伺服器返回的錯誤訊息，如果沒有則顯示通用錯誤
+                }
+            } catch (error) {
+                // 捕獲網路錯誤或伺服器無法連線的錯誤
+                console.error('網路請求錯誤：', error);
+                messageDiv.classList.remove('success');
+                messageDiv.classList.add('error');
+                messageDiv.textContent = '網路錯誤或伺服器無法連線。';
+            } finally {
+                messageDiv.style.display = 'block'; // 最後，顯示訊息區塊
+            }
+        });
+    </script>
+</body>
+</html>
+ 
