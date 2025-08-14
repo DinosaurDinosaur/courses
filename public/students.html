@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學生選課資料</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e9ecef;
+            display: flex;
+            flex-direction: column; /* 讓內容垂直排列 */
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #343a40;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 35px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px; /* 調整最大寬度以容納表格 */
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #343a40;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 600;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse; /* 讓表格邊框合併 */
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff; /* 表頭背景色 */
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa; /* 偶數行背景色 */
+        }
+        tr:hover {
+            background-color: #e2e6ea; /* 滑鼠懸停時的背景色 */
+        }
+        #loadingMessage {
+            text-align: center;
+            margin-top: 20px;
+            font-style: italic;
+            color: #6c757d;
+        }
+        #errorMessage {
+            color: #dc3545;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            display: none; /* 預設隱藏 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📑 已選課程清單</h1>
+        <div id="loadingMessage">載入中...</div>
+        <div id="errorMessage"></div>
+        <table id="studentsTable">
+            <thead>
+                <tr>
+                    <th>學生姓名</th>
+                    <th>選修課程</th>
+                    <th>選課日期</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const loadingMessage = document.getElementById('loadingMessage');
+            const errorMessage = document.getElementById('errorMessage');
+            const studentsTableBody = document.querySelector('#studentsTable tbody');
+
+            try {
+                // 向後端 API 請求學生選課資料
+                const response = await fetch('/api/students'); 
+                
+                if (!response.ok) {
+                    // 如果響應狀態碼不是 2xx，則拋出錯誤
+                    throw new Error(`HTTP 錯誤！狀態碼：${response.status}`);
+                }
+
+                const students = await response.json(); // 解析 JSON 格式的響應
+
+                loadingMessage.style.display = 'none'; // 隱藏載入訊息
+
+                if (students.length === 0) {
+                    studentsTableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">目前沒有選課資料。</td></tr>';
+                } else {
+                    // 遍歷學生資料陣列，將每一筆資料添加到表格中
+                    students.forEach(student => {
+                        const row = studentsTableBody.insertRow(); // 插入新的一行
+                        // 插入單元格並填入資料
+                        row.insertCell().textContent = student.name;
+                        row.insertCell().textContent = student.major;
+                        // 選課日期格式化，只顯示日期部分
+                        row.insertCell().textContent = new Date(student.enrollment_date).toLocaleDateString('zh-TW');
+                    });
+                }
+            } catch (error) {
+                console.error('獲取學生資料時發生錯誤：', error);
+                loadingMessage.style.display = 'none'; // 隱藏載入訊息
+                errorMessage.style.display = 'block'; // 顯示錯誤訊息
+                errorMessage.textContent = '載入學生選課資料失敗，請稍後再試。';
+                studentsTableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">無法載入資料。</td></tr>';
+            }
+        });
+    </script>
+</body>
+</html>

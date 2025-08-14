@@ -46,6 +46,34 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// app.js (新增內容)
+
+// 路由：當用戶訪問 /students 時，發送 students.html 檔案
+app.get('/students', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'students.html'));
+});
+
+// API 路由：從資料庫獲取所有學生選課資料
+app.get('/api/students', async (req, res) => {
+    let connection;
+    try {
+        connection = await getConnection(); // 獲取資料庫連接
+        // 查詢所有學生的姓名、選修課程和選課日期
+        const [rows] = await connection.execute('SELECT name, major, enrollment_date FROM student ORDER BY enrollment_date DESC');
+        
+        // 將查詢結果以 JSON 格式發送回前端
+        res.status(200).json(rows);
+    } catch (err) {
+        console.error('❌ 從資料庫獲取學生資料時發生錯誤：', err.message);
+        res.status(500).send('無法獲取學生選課資料。');
+    } finally {
+        if (connection) {
+            connection.end(); // 關閉資料庫連接
+        }
+    }
+});
+
+
 // 處理選課表單提交的 POST 請求
 app.post('/submit-enrollment', async (req, res) => {
     // 從前端請求的 Body 中解構出 `studentName` 和 `selectedCourse`
