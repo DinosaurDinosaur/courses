@@ -9,7 +9,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #e9ecef;
             display: flex;
-            flex-direction: column; /* 讓內容垂直排列 */
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
             margin: 0;
@@ -23,7 +23,7 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 800px; /* 調整最大寬度以容納表格 */
+            max-width: 800px;
             box-sizing: border-box;
             margin-bottom: 20px;
         }
@@ -36,7 +36,7 @@
         }
         table {
             width: 100%;
-            border-collapse: collapse; /* 讓表格邊框合併 */
+            border-collapse: collapse;
             margin-top: 20px;
         }
         th, td {
@@ -45,30 +45,15 @@
             text-align: left;
         }
         th {
-            background-color: #007bff; /* 表頭背景色 */
+            background-color: #007bff;
             color: white;
             font-weight: bold;
             text-transform: uppercase;
         }
-        tr:nth-child(even) {
-            background-color: #f8f9fa; /* 偶數行背景色 */
-        }
-        tr:hover {
-            background-color: #e2e6ea; /* 滑鼠懸停時的背景色 */
-        }
-        #loadingMessage {
-            text-align: center;
-            margin-top: 20px;
-            font-style: italic;
-            color: #6c757d;
-        }
-        #errorMessage {
-            color: #dc3545;
-            text-align: center;
-            margin-top: 20px;
-            font-weight: bold;
-            display: none; /* 預設隱藏 */
-        }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        tr:hover { background-color: #e2e6ea; }
+        #loadingMessage { text-align: center; margin-top: 20px; font-style: italic; color: #6c757d; }
+        #errorMessage { color: #dc3545; text-align: center; margin-top: 20px; font-weight: bold; display: none; }
     </style>
 </head>
 <body>
@@ -79,13 +64,13 @@
         <table id="studentsTable">
             <thead>
                 <tr>
+                    <th>學號</th>
                     <th>學生姓名</th>
                     <th>選修課程</th>
                     <th>選課日期</th>
                 </tr>
             </thead>
-            <tbody>
-                </tbody>
+            <tbody></tbody>
         </table>
     </div>
 
@@ -96,37 +81,30 @@
             const studentsTableBody = document.querySelector('#studentsTable tbody');
 
             try {
-                // 向後端 API 請求學生選課資料
                 const response = await fetch('/api/students'); 
                 
-                if (!response.ok) {
-                    // 如果響應狀態碼不是 2xx，則拋出錯誤
-                    throw new Error(`HTTP 錯誤！狀態碼：${response.status}`);
-                }
+                if (!response.ok) throw new Error(`HTTP 錯誤！狀態碼：${response.status}`);
 
-                const students = await response.json(); // 解析 JSON 格式的響應
-
-                loadingMessage.style.display = 'none'; // 隱藏載入訊息
+                const students = await response.json();
+                loadingMessage.style.display = 'none';
 
                 if (students.length === 0) {
-                    studentsTableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">目前沒有選課資料。</td></tr>';
+                    studentsTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">目前沒有選課資料。</td></tr>';
                 } else {
-                    // 遍歷學生資料陣列，將每一筆資料添加到表格中
                     students.forEach(student => {
-                        const row = studentsTableBody.insertRow(); // 插入新的一行
-                        // 插入單元格並填入資料
+                        const row = studentsTableBody.insertRow();
+                        row.insertCell().textContent = student.student_number; // 顯示使用者輸入的學號
                         row.insertCell().textContent = student.name;
                         row.insertCell().textContent = student.major;
-                        // 選課日期格式化，只顯示日期部分
                         row.insertCell().textContent = new Date(student.enrollment_date).toLocaleDateString('zh-TW');
                     });
                 }
             } catch (error) {
                 console.error('獲取學生資料時發生錯誤：', error);
-                loadingMessage.style.display = 'none'; // 隱藏載入訊息
-                errorMessage.style.display = 'block'; // 顯示錯誤訊息
+                loadingMessage.style.display = 'none';
+                errorMessage.style.display = 'block';
                 errorMessage.textContent = '載入學生選課資料失敗，請稍後再試。';
-                studentsTableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: red;">無法載入資料。</td></tr>';
+                studentsTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">無法載入資料。</td></tr>';
             }
         });
     </script>

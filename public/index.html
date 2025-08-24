@@ -123,7 +123,11 @@
             </div>
 
             <div class="form-group">
-                <label for="selectedCourse">選擇課程:</label>
+                <label for="studentId">學號:</label>
+                <input type="text" id="studentId" name="studentId" required placeholder="請輸入您的學號">
+            </div>
+
+            <div class="form-group">
                 <select id="selectedCourse" name="selectedCourse" required>
                     <option value="">-- 請選擇課程 --</option>
                     <option value="數學課">數學課</option>
@@ -145,12 +149,13 @@
             const form = event.target; // 獲取觸發表單提交的表單元素
             const formData = new FormData(form); // 建立 FormData 物件來獲取表單數據
             
-            // 從 FormData 中獲取 `studentName` 和 `selectedCourse` 的值
+            // 從 FormData 中獲取 `studentName`、`studentId` 和 `selectedCourse` 的值
             const studentName = formData.get('studentName');
+            const studentId = formData.get('studentId');
             const selectedCourse = formData.get('selectedCourse');
 
             // 組織要發送給後端的資料物件 (JSON 格式)
-            const data = { studentName, selectedCourse };
+            const data = { studentName, studentId, selectedCourse };
 
             const messageDiv = document.getElementById('message'); // 獲取顯示訊息的元素
             messageDiv.style.display = 'none'; // 預設隱藏訊息，以便在每次提交時更新
@@ -192,3 +197,4 @@
 </body>
 </html>
  
+
